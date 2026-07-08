@@ -57,7 +57,6 @@ jobs:
             --collect-all google ^
             --collect-all google_auth_oauthlib ^
             --collect-all pypdf ^
-            --collect-all pymupdf ^
             --collect-all fitz ^
             "ERP 업무 런처.py"
           xcopy /E /I /Y "dist\Office_ERP" "."
