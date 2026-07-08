@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/build-office-erp-release.yml"
       - "release-trigger.txt"
+      - "Office ERP Windows/**"
 
 permissions:
   contents: write
@@ -20,22 +21,14 @@ jobs:
       - name: Checkout release repo
         uses: actions/checkout@v4
 
-      - name: Download ERP source
+      - name: Resolve Office ERP source
         shell: pwsh
         run: |
-          $zipPath = Join-Path $env:RUNNER_TEMP "erp-main.zip"
-          $extractPath = Join-Path $env:RUNNER_TEMP "erp-main"
-          Invoke-WebRequest `
-            -Uri "https://github.com/ryangroe0618-maker/ERP/archive/refs/heads/main.zip" `
-            -OutFile $zipPath `
-            -Headers @{ "User-Agent" = "Office-ERP-Release-Builder" } `
-            -TimeoutSec 300
-          Expand-Archive -Path $zipPath -DestinationPath $extractPath -Force
-          $source = Get-ChildItem -Path $extractPath -Directory | Select-Object -First 1
-          if (-not $source) {
-            throw "ERP source archive extract failed."
+          $source = Join-Path $env:GITHUB_WORKSPACE "Office ERP Windows"
+          if (-not (Test-Path $source)) {
+            throw "Office ERP Windows source folder was not found."
           }
-          "ERP_SOURCE=$($source.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "ERP_SOURCE=$source" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -137,5 +130,5 @@ jobs:
           $forceUpdater = Join-Path $env:RUNNER_TEMP $env:OFFICE_ERP_FORCE_UPDATER_ASSET_NAME
           gh release create $tag $exeZip $scriptZip $manifest $forceUpdater `
             --title "Office ERP Windows $tag" `
-            --notes "자동 빌드 버전: $tag`n소스 저장소: ryangroe0618-maker/ERP main" `
+            --notes "자동 빌드 버전: $tag`n소스 저장소: ryangroe0618-maker/OFFIEC-ERP-Release main" `
             --latest
